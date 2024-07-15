@@ -1,0 +1,19 @@
+{
+  "name": "angular-service-layer",
+  "version": "1.0.0",
+  "description": "Angular Service layering technique with full type retention",
+  "main": "index.js",
+  "repository": "git@github.com:mrvea/angular-service-layer.git",
+  "author": "Evgeniy Vakhroushev <mr.vea@live.com>",
+  "license": "MIT",
+  "private": true,
+
+  "workspaces":[
+    "angular"
+  ],
+  "scripts": {
+
+    "apps": "yarn workspace angular run",
+    "_apps": "yarn workspace angular"
+  }
+}
