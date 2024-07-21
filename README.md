@@ -29,7 +29,7 @@ Note: I have tried this for nodejs server and it worked very well. It was pretty
 
 ## Criteria
 
-- : Single service for communication
+- Single service for communication
 - Easy to add features/abilities to the service
 - Abstract sublayers services. User of the communication service would not know which layer the method came from.
 - Isolation of domain
@@ -250,11 +250,18 @@ export type ContextualMethods<T extends GenericObj> = {
 ```
 
 ## Definitions
-Child service - any service that projects their methods through composition
-Communication service - external communication from a domain
-Layer - a service that would be use to extend the functionality of a communication service
-    - could be a sudo sub communication service with child layers
-Mixins "extend" - special mixins which returns an inline class extension with type retention and loss of identify
-Mixins - mixing multiple class into one. 
-Parent service - any service that contains composition methods from other service.
-Sub service - see Child service
+Child service 
+: any service that projects their methods through composition
+Communication service 
+: external communication from a domain
+Layer
+: a service that would be use to extend the functionality of a communication service
+: could be a sudo sub communication service with child layers
+Mixins "extend"
+: special mixins which returns an inline class extension with type retention and loss of identify
+Mixins
+: mixing multiple class into one. 
+Parent service
+: any service that contains composition methods from other service.
+Sub service
+: see Child service
