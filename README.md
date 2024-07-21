@@ -149,11 +149,11 @@ Composer is a mixin factory builder.
 First, it takes in behaviors, which returns a mixin factory
 
 ```ts
-    <U extends (GenericObj & Constructor)[]>(behaviors: U)=> {...}
+<U extends (GenericObj & Constructor)[]>(behaviors: U)=> {...}
 ```
 the mixin factory accepts "private" or explicitly hidden methods, 
 ```ts
-    <M extends keyof ContextualMethods<U[number]['prototype']> | undefined>(...privateMethods: M[]) => {...}
+<M extends keyof ContextualMethods<U[number]['prototype']> | undefined>(...privateMethods: M[]) => {...}
 ```
 Note: These function params could be combined, but there some use cases where the separation is neccessary.
 
@@ -167,41 +167,41 @@ The method in the layers class maintains its encapsulation.
 AbstractLayer adds some restrictions and adds protected properties and methods. `@Layer()` decorator is restricted to this class or any classes extend from this class. This is done to ensure these properties and methods are present.
 
 ```ts
-    export abstract class AbstractLayer {
-        static injector: Injector;
-        protected Handlers: GenericObj<ProviderToken<AbstractLayer>> = {};
-        protected Injector: Injector | undefined
+export abstract class AbstractLayer {
+    static injector: Injector;
+    protected Handlers: GenericObj<ProviderToken<AbstractLayer>> = {};
+    protected Injector: Injector | undefined
 
-        protected GetHandler(pt: ProviderToken<unknown>) {
-            if (!this.Injector) return AbstractLayer.injector.get(pt);
-            return this.Injector.get(pt);
-        }
-
-        protected HasMethod(name: string) {
-            return name in this && typeof (this as any)[name] === 'function'
-        }
-
+    protected GetHandler(pt: ProviderToken<unknown>) {
+        if (!this.Injector) return AbstractLayer.injector.get(pt);
+        return this.Injector.get(pt);
     }
+
+    protected HasMethod(name: string) {
+        return name in this && typeof (this as any)[name] === 'function'
+    }
+
+}
 ```
 
 The mixin function does not need to "know" how we get the `handler`, so it calls abstracted `Gethandler` method. This method uses angular `Injector` class to "get" the service. The child layer is not injected unless one of its methods are called. The `Injector` class is usually injected as well, so extended class will need to constructor inject it as protected property with the same name or add it as static injector at a module level. 
 Note: The static variable approach did not sit right with me, and modules are not as popular now, due to standalone components. 
 
 ```ts
-    export class ResolverLayer<T extends GenericObj[]> extends AbstractLayer {
-        /**
-         * tries to call a method from string name.
-         * Note: this method throws, so it must succeed. 
-         * @param method method name
-         * @param params list of params represented in the method if found
-         */
-        resolve<M extends keyof MergeEndpoints<T>>(method: M, ...params: Parameters<MergeEndpoints<T>[M]>) {
-            if(!(method in this)){
-                throw new Error(`Unknown method ${method}`)
-            }
-            return this[method as keyof this](...params) 
+export class ResolverLayer<T extends GenericObj[]> extends AbstractLayer {
+    /**
+     * tries to call a method from string name.
+     * Note: this method throws, so it must succeed. 
+     * @param method method name
+     * @param params list of params represented in the method if found
+     */
+    resolve<M extends keyof MergeEndpoints<T>>(method: M, ...params: Parameters<MergeEndpoints<T>[M]>) {
+        if(!(method in this)){
+            throw new Error(`Unknown method ${method}`)
         }
+        return this[method as keyof this](...params) 
     }
+}
 ```
 This class adds a helper function to use string names to call a method from the service.
 The property types and count are maintained. This is usually added to any root layers or sub root layers
@@ -212,41 +212,41 @@ This is where the magic happens to main the method signatures.
 Note: full list of generic is the example
 
 ```ts
-    export type Endpoint<T extends unknown = any> = Observable<T>
+export type Endpoint<T extends unknown = any> = Observable<T>
 ```
 generic endpoint observable, which will limit autocompletion to method that have observable return type
 
 
 ```ts
-    export type EndpointMethod = AnyFunction<any, Endpoint>
+export type EndpointMethod = AnyFunction<any, Endpoint>
 ```
 generic for method with endpoint return 
 
 ```ts
-    export type MethodNames<T> = {
-        [K in keyof T]: T[K] extends EndpointMethod ? K : never;
-    }[keyof T];
+export type MethodNames<T> = {
+    [K in keyof T]: T[K] extends EndpointMethod ? K : never;
+}[keyof T];
 ```
 This excludes all methods that do not have an observable as a return type
 
 ```ts
-    export type MergeEndpoints<T extends GenericObj[]> = ContextualMethods<T[number]['prototype']>
+export type MergeEndpoints<T extends GenericObj[]> = ContextualMethods<T[number]['prototype']>
 ```
 generic way to extract method from a class
 Note: I have not seen this does this way, and I am not sure if it is proper away, but it works for this use case. 
     Please tell me if there is a better way.
 
 ```ts
-    /**
-     * Derives Object type with Endpoint method type from type list of Object.
-     * Explicitly excludes `resolve` method (reserved word under api context)
-     */
-    export type ContextualMethods<T extends GenericObj> = {
-        [K in (T extends GenericObj ? Exclude<MethodNames<T>, 'resolve'> : never)]:
-        T extends GenericObj
-        ? T[K] extends EndpointMethod ? T[K] : never
-        : never
-    }
+/**
+ * Derives Object type with Endpoint method type from type list of Object.
+ * Explicitly excludes `resolve` method (reserved word under api context)
+ */
+export type ContextualMethods<T extends GenericObj> = {
+    [K in (T extends GenericObj ? Exclude<MethodNames<T>, 'resolve'> : never)]:
+    T extends GenericObj
+    ? T[K] extends EndpointMethod ? T[K] : never
+    : never
+}
 ```
 
 ## Definitions
