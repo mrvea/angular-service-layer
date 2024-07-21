@@ -2,10 +2,31 @@
 Add more methods to a service without modified existing service 
 
 ## Introduction
-Hello, My name is Evgeniy Vakhroushev. Most people call me Gene. I have been developing a developer for 10 years. I have been developing with angular for 9 years. I am a big promoter of typescript. I came up with the concept and implementation for layering angular services. I have not found any elegant solutions to the problem from my research. I wanted to create proof of concept for anyone that it may help.
-The implementation is mainly derived from my use cases and current limitations,so if something does not work in your use case, it can be modified plethora of ways.
+Hello, My name is Evgeniy Vakhroushev. Most people call me Gene. I have been a developer for 10 years and I have been developing with angular for 9 years. I am a big promoter of typescript and its generic system. From my experience, there is a problem with typescript. The problem is the inability to extend from multiple classes. I have not found any elegant solutions to the problem from my research. I wanted to create proof of concept for anyone that it may help. I came up with the concept and the implementation for layered angular services.
+The implementation is mainly derived from my use cases and current limitations,so if something does not work in your use case, it can be modified in a plethora of ways.
 
-Layering concept is still underdevelopment and evolving. Any suggestions are welcome!
+This Layering concept implementation is still under development and evolving. Any suggestions are welcome!
+
+## Problem/Reason
+In many projects that I worked in, I ran into an issue of very large services and/or many services injections with manual method wrapping. 
+In my cases I wanted to import one service and use this service only, and without complications. Imagine a service that is a mini API server, which has endpoints(methods) that handle some logic for whom ever is using it. I want to group the methods by some contextual logic and extract those groups into separate files or services. 
+
+I have seen or tried all of these option to resolve the problem.
+### Single service
+Cram all of the methods into one service. This will break single responsibility rule, which one should separate code under some logical context or domain. 
+Bloated service will be hard to organize, test and debug. 
+
+### Inheritance
+Each (sub) service inherits from another. This was essentially inheritance chaining. This worked when the services were very simple, but any added complexity is a headache to deal with. The inner communication was most impossible, so any interactions had to be extracted into multiple protected methods. It was difficult to update. The classes in typescript cannot be extended by multiple classes.
+
+### Composition
+Making services by context and grouping them under a domain if applicable. Injecting those service explicitly into communication service, and wrapping each expected method into a public communication method.
+This worked, but the recreation the methods and signatures in the parent service seamed unnecessary. This made signature modification cumbersome. The injected serves could be made public, but this adds prior knowledge issue, and became cumbersome to use in dynamic way. 
+
+### Mixins
+Pure mixins are not as elegant in angular, because types would be lost in the merge with mixin decorator and we could not use "extend" mixins. The "extend" mixins will take way the elegant use of Service classes, but this is a personal choice. There is issue of `this` as well with mixins, because encapsulation is broken and binding is lost.
+Note: I have tried this for nodejs server and it worked very well. It was pretty elegant.
+
 ## Criteria
 
 - Single service for communication
@@ -16,35 +37,23 @@ Layering concept is still underdevelopment and evolving. Any suggestions are wel
 - Layered service could be injected independently(one direction only) 
 - scalable
 - Abstract with decorators
-## Problem/Reason
-In many projects that I worked in, I ran into an issue of very large services and/or many services injections with manual method wrapping. 
-In my cases I wanted to import one service and use this service only without complications. Imagine a service that is a mini API server, which has endpoints(methods) that handle some logic for whom ever is using it. 
-### Single service
-Cram all of the methods into service, but this will break single responsibility rule, which separates services under some logical context or domain. 
-Bloated service will be hard to organize, test and debug. 
-### Inheritance
-Each (sub) service was inheriting from another. This was essentially inheritance chaining. This worked when the services were very simple, but any added complexity was a headache. The inner communication was most impossible, so any interactions had to be extracted into multiple protected methods. It was a headache to update or change. 
-### Composition
-Making services by context and grouping them under a domain if applicable. Injecting those service explicitly into communication service. and wrapping each expected method into a public communication method.
-This worked, but the recreation the methods and signatures in the parent service seamed unnecessary. This made signature modification cumbersome. The injected serves could be made public, but this adds prior knowledge and cumbersome to use in dynamic way. 
-### Mixins
-I have tried this for nodejs server and it worked very well. It was pretty elegant. Pure mixing was not as elegant in angular, because types would be lost in the merge with mixin decorator and we could not use "extend" mixins. There is issue of `this` as well with mixins, because encapsulation is broken.
-
+  
 ## Concept
-Services are created with some contextual methods that application needs. A normal service as 'root' provider. A `@Layer` decorator is added to the service. Layer classed do extend from AbstractLayer Class, which add typing in the mixins and expected behavior contract.
-A root layer service is created. A root layer will have `@Layer` decorator, but all of the child layer will be added as `subLayer`. Due to limitation of typescript, root layer service interface will have to be extend with child layer interfaces. All classes in typescript have interfaces with the name, and those interfaces can be "overloaded" or extended. This is a workaround, but it is pretty seamless.
-Mixins will create method wrappers with for each exported method. Mixins are used to created dynamic composition, because wrapper method do not relinquish ownership from the original methods. Wrapper function just call the method and pass all of the parameters.
-Communication service will extend the root layer service or any other service. 
+Services are created with some contextual methods that application needs, like any other service in angular. A `@Layer()` decorator is added to the service. Layered class does extend from `AbstractLayer Class`, which adds typings in the mixin, and an expected behavior contract.
+A root layer service is then created. A root layer will have `@Layer()` decorator as well, but all of the child layers will be added as `subLayers`. Due to a limitation of typescript, root layer service interface will have to be extend with child layer interfaces. All classes in typescript have interfaces with the name, and those interfaces can be "overloaded" or extended. This is a workaround, but it is pretty seamless.
+Mixins will create method wrappers for each exported method. Mixins are used to created dynamic composition, because wrapper method does not relinquish ownership from all the original iterated methods. Wrapper function just calls the method and passes all of the parameters to it.
+Communication service will extend the root layer service. 
 Communication service is never used internally(inside of the domain), so that there is no circular dependency.  
 
-Now root layer could be used to add plethora of service, in turn methods
+Now root layer could be used to add a plethora of services, in turn, methods.
 
 ## Breakdown
 
 in-depth breakdown of the concept
+
 ### Services:
-Normal service with `@Layer()` decorator added to the class. The class extends an AbstractLayer class which I will explain in detail later
-As a convention, I use `.layet.ts` for these services
+Normal service with `@Layer()` decorator added to the class. The class extends an AbstractLayer class which will be explained in detail later
+As a naming convention, I use `.layer.ts` for these services, instead of `.service.ts`
 ``` ts
 @Injectable({ProvideIn: 'root'})
 @Layer()
@@ -54,7 +63,7 @@ export class SomeLayer extends AbstractLayer {
 
 ```
 #### Communication service
-A service with extends from root layer service.
+A service that extends from a root layer service.
 Note: the class names are arbitrary.
 
 ``` ts
@@ -79,7 +88,7 @@ export interface Layers extends MergeEndpoints<typeof subLayers> {}
 ```
 #### class decorator
 
-Layer Decorator function to hide mixins, add hidden properties, and 
+Layer Decorator function to hide mixins, and adds hidden properties.
 
 ```ts
 export function Layer<T extends (GenericObj & Constructor)[], M extends keyof ContextualMethods<T[number]['prototype']>>({
@@ -111,7 +120,7 @@ The class mixin returned from composer make a dynamic wrapper method for each al
 		return derivedCtor as T & ContextualMethods<U[number]['prototype']>
     };
 ```
-The add method takes all of the properties and filters only functions, filters out private or hidden methods a makes a wrapper method
+The `addMethods` takes all of the properties and filters only functions, filters out private or hidden methods and makes a wrapper method
 
 ```ts
 function addMethod(derivedCtor: Constructor, baseCtor: Constructor) {
@@ -130,14 +139,14 @@ function addMethod(derivedCtor: Constructor, baseCtor: Constructor) {
 ```
 A method is added with the same name as the method in the child service.
 The wrapper method has a check if a child layer is present or not. If not present, it is requested with `GetHandler` method. 
-Then the the method is called from layer directly with specific properties and results are returned
+Then the the method is called from layer service directly with specific properties and results are returned.
 
 Note: This `GenHandler` method is from the AbstractLayers class.
 
 #### composer
 Composer is a mixin factory builder. 
 
-First it takes in behaviors, which returns a mixin factory
+First, it takes in behaviors, which returns a mixin factory
 
 ```ts
     <U extends (GenericObj & Constructor)[]>(behaviors: U)=> {...}
@@ -146,14 +155,16 @@ the mixin factory accepts "private" or explicitly hidden methods,
 ```ts
     <M extends keyof ContextualMethods<U[number]['prototype']> | undefined>(...privateMethods: M[]) => {...}
 ```
-Note: These function params could be combined, but there some use cases that the separation is neccessary
+Note: These function params could be combined, but there some use cases where the separation is neccessary.
+
 ### Composition
 
-The wrapper method, displayed on the mixins section, is composition, or has-a method from another class. The same way a person would wrap a function from a child class. This method does it automatically.
+The wrapper method, that is displayed in the mixins section, is a composition, or `has-a` method from another class. The same way a person would wrap a function from a child class, this method does it automatically.
 The method in the layers class maintains its encapsulation.
+
 ### Extension
 
-AbstractLayer is a class to add some restriction and protected methods. `@Layer` decorator is restricted to this class or any classes extend from this class. This is done to insure these properties and methods are present.
+AbstractLayer adds some restrictions and adds protected properties and methods. `@Layer()` decorator is restricted to this class or any classes extend from this class. This is done to ensure these properties and methods are present.
 
 ```ts
     export abstract class AbstractLayer {
@@ -173,8 +184,8 @@ AbstractLayer is a class to add some restriction and protected methods. `@Layer`
     }
 ```
 
-The mixins function does need to "know" how we get the `handler`, so it calls `Gethandler`. This method uses angular `Injector` class to "get" the service. The layer is not injected unless one of its methods is called. The `Injector` class is usually injected as well, so extended class will need to constructor inject it as protected property with the same name or add it as static injector at a module level. 
-Note: The static variable approach did not sit right with me, and modules are not as popular now. 
+The mixin function does not need to "know" how we get the `handler`, so it calls abstracted `Gethandler` method. This method uses angular `Injector` class to "get" the service. The child layer is not injected unless one of its methods are called. The `Injector` class is usually injected as well, so extended class will need to constructor inject it as protected property with the same name or add it as static injector at a module level. 
+Note: The static variable approach did not sit right with me, and modules are not as popular now, due to standalone components. 
 
 ```ts
     export class ResolverLayer<T extends GenericObj[]> extends AbstractLayer {
@@ -192,8 +203,8 @@ Note: The static variable approach did not sit right with me, and modules are no
         }
     }
 ```
-This class adds a helper function to use string names to call a method from the service. The property types and count is maintained
-This is add to any root layers or sub root layers
+This class adds a helper function to use string names to call a method from the service.
+The property types and count are maintained. This is usually added to any root layers or sub root layers
 
 ### Generics
 
@@ -222,7 +233,7 @@ This excludes all methods that do not have an observable as a return type
     export type MergeEndpoints<T extends GenericObj[]> = ContextualMethods<T[number]['prototype']>
 ```
 generic way to extract method from a class
-Note: I have not seen this does this way. I am not sure if it is proper, but I works for this use case. 
+Note: I have not seen this does this way, and I am not sure if it is proper away, but it works for this use case. 
     Please tell me if there is a better way.
 
 ```ts
