@@ -17,7 +17,7 @@ export const composer =
      * @returns class decorator
      */
 
-    <M extends keyof ContextualMethods<U[number]['prototype']>>(...privateMethods: M[]) =>
+    <M extends keyof ContextualMethods<U[number]['prototype']> | undefined>(...privateMethods: M[]) =>
     /**
      * class decorator or class mixin function which adds methods from each extending behavior object
      * @param derivedCtor 
@@ -64,12 +64,9 @@ export const composer =
     
             Object.defineProperty(derivedCtor.prototype, name, {
                 value: function <P extends unknown>(...args: P[]) {
-                    if (!this ||
-                        !this.Handlers[baseCtor.name]
-                        //|| !(name in this.Handlers[baseCtor.name].EndPoints)
+                    if (!this.Handlers[baseCtor.name]
                     ) {
                         this.Handlers[baseCtor.name] = this.GetHandler(baseCtor)
-                        // throw new Error(`Unable find handler with name ${baseCtor}`);
                     }
                     return this.Handlers[baseCtor.name][name](...args);
                 },

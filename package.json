@@ -6,6 +6,7 @@
   "repository": "git@github.com:mrvea/angular-service-layer.git",
   "author": "Evgeniy Vakhroushev <mr.vea@live.com>",
   "license": "MIT",
+  "keywords": ["Angular", "Service", "Mixins", "Composition", "Decorators", "multiple class inheritance", "inheritance"],
   "private": true,
 
   "workspaces":[

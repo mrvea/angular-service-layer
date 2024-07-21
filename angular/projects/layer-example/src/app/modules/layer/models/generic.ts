@@ -35,3 +35,4 @@ export type ContextualMethods<T extends GenericObj> = {
 	? T[K] extends EndpointMethod ? T[K] : never
 	: never
 }
+

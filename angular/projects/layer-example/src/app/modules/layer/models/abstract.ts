@@ -25,10 +25,11 @@ export abstract class AbstractLayer {
  * Defines a capability to invoke and watch contextual methods
  */
 export class ResolverLayer<T extends GenericObj[]> extends AbstractLayer {
-    /**
-     * 
-     * @param method 
-     * @param params 
+     /**
+     * tries to call a method from string name.
+     * Note: this method throws, so it must succeed. 
+     * @param method method name
+     * @param params list of params represented in the method if found
      */
 	resolve<M extends keyof MergeEndpoints<T>>(method: M, ...params: Parameters<MergeEndpoints<T>[M]>) {
 		if(!(method in this)){
