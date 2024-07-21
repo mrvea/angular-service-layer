@@ -29,7 +29,7 @@ Note: I have tried this for nodejs server and it worked very well. It was pretty
 
 ## Criteria
 
-- Single service for communication
+- : Single service for communication
 - Easy to add features/abilities to the service
 - Abstract sublayers services. User of the communication service would not know which layer the method came from.
 - Isolation of domain
