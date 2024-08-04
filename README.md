@@ -195,7 +195,7 @@ export class ResolverLayer<T extends GenericObj[]> extends AbstractLayer {
      * @param method method name
      * @param params list of params represented in the method if found
      */
-    resolve<M extends keyof MergeEndpoints<T>>(method: M, ...params: Parameters<MergeEndpoints<T>[M]>) {
+    mustResolve<M extends keyof MergeEndpoints<T>>(method: M, ...params: Parameters<MergeEndpoints<T>[M]>) {
         if(!(method in this)){
             throw new Error(`Unknown method ${method}`)
         }
@@ -242,7 +242,7 @@ Note: I have not seen this does this way, and I am not sure if it is proper away
  * Explicitly excludes `resolve` method (reserved word under api context)
  */
 export type ContextualMethods<T extends GenericObj> = {
-    [K in (T extends GenericObj ? Exclude<MethodNames<T>, 'resolve'> : never)]:
+    [K in (T extends GenericObj ? Exclude<MethodNames<T>, 'mustResolve'> : never)]:
     T extends GenericObj
     ? T[K] extends EndpointMethod ? T[K] : never
     : never

@@ -14,6 +14,6 @@ export class ExampleComponent implements OnInit {
     ngOnInit(): void { 
         this._store.createContact("name", "com")
         this._store.createEvent("some event")
-        this._store.resolve("createEvent", "another event")
+        this._store.mustResolve("createEvent", "another event")
     }
 }

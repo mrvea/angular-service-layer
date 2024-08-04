@@ -30,7 +30,7 @@ export type MergeEndpoints<T extends GenericObj[]> = ContextualMethods<T[number]
  * Explicitly excludes `resolve` method (reserved word under api context)
  */
 export type ContextualMethods<T extends GenericObj> = {
-	[K in (T extends GenericObj ? Exclude<MethodNames<T>, 'resolve'> : never)]:
+	[K in (T extends GenericObj ? Exclude<MethodNames<T>, 'mustResolve'> : never)]:
 	T extends GenericObj
 	? T[K] extends EndpointMethod ? T[K] : never
 	: never
