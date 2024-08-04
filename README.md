@@ -1,5 +1,5 @@
-# Angular Service Layering (UNDER CONSTRUCTION)
-Add more methods to a service without modified existing service 
+# Angular Service Layering
+Add more methods to a service without modified existing service.
 
 ## Introduction
 Hello, My name is Evgeniy Vakhroushev. Most people call me Gene. I have been a developer for 10 years and I have been developing with angular for 9 years. I am a big promoter of typescript and its generic system. From my experience, there is a problem with typescript. The problem is the inability to extend from multiple classes. I have not found any elegant solutions to the problem from my research. I wanted to create proof of concept for anyone that it may help. I came up with the concept and the implementation for layered angular services.
@@ -248,6 +248,22 @@ export type ContextualMethods<T extends GenericObj> = {
     : never
 }
 ```
+
+## Possible Issues/Concerns
+
+  - Explicitly hidden methods will have be manually excluded from overloaded interface. If not excluded from the interface, the excluded method will not exist in the communication service layer, but the type signature will still exist. This will be misleading for the consumer.
+  - The setup is not as streamlined as it could be. 
+    - the check and injection in every "ported" method. Lazy loading would be better
+      - Note: I am finalizing a solution for lazy loading layers.
+    - Boilerplate code.
+      - Note: It is kept at a minimum, and similar to angular style.
+  - Method naming collision. 
+    - the same signature will not show as in issue in the linter
+    - the different signature will show an issue at the register location, and not in the layer itself
+  - Depth of method wrapping could become an issue. For every sub communication service layer is made, number methods would increase by the number of method in the added layer * number of sub communication service layers from root.
+  
+  
+
 
 ## Definitions
 
