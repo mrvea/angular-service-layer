@@ -3,10 +3,11 @@ Add more methods to a service without modified existing service.
 
 ## Introduction
 Hello, My name is Evgeniy Vakhroushev. Most people call me Gene. I have been a developer for 9+ years and I have been developing with angular for 7+ years. I am a big promoter of typescript and its generic system. From my experience, there is a problem with typescript. The problem is the inability to extend from multiple classes. I have not found any elegant solutions to the problem from my research. I wanted to create proof of concept for anyone that it may help. I came up with the concept and the implementation for layered angular services.
-The implementation is mainly derived from my use cases and current limitations,so if something does not work in your use case, it can be modified in a plethora of ways.
+The implementation is mainly derived from my use cases and current limitations, so if something does not work in your use case, it can be modified in a plethora of ways.
 
 This Layering concept implementation is still under development and evolving. Any suggestions are welcome!
 
+Note: Sample project is under angular folder.
 ## Problem/Reason
 In many projects that I worked in, I ran into an issue of very large services and/or many services injections with manual method wrapping. 
 In my cases I wanted to import one service and use this service only, and without complications. Imagine a service that is a mini API server, which has endpoints(methods) that handle some logic for whom ever is using it. I want to group the methods by some contextual logic and extract those groups into separate files or services. 
@@ -67,7 +68,7 @@ A service that extends from a root layer service.
 Note: the class names are arbitrary.
 
 ``` ts
-@Injectable({{ProvideIn: 'roo'}})
+@Injectable({{ProvideIn: 'root'}})
 export class Store extends Layers{}
 ```
 
